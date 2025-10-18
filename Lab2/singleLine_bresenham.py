@@ -6,53 +6,58 @@ from OpenGL.GLUT import *
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 
-X0, Y0 = 100, 100
-X1, Y1 = 220, 230
 
 # Will hold generated points from DDA
 POINTS = []
 
+# Bresenham function for line generation 
+def Bresenham(X1,Y1,X2,Y2): 
+    # calculate dx & dy 
+    dx = X2 - X1 
+    dy = Y2 - Y1 
 
-def DDA(x0, y0, x1, y1):
-    points = []
+    # initial value of decision parameter d 
+    d = dy - (dx/2) 
+    x = X1
+    y = Y1 
 
-    dx = x1 - x0
-    dy = y1 - y0
-    steps = int(max(abs(dx), abs(dy)))
+    # Plot initial given point 
+    # putpixel(x,y) can be used to print pixel 
+    # of line in graphics 
+    POINTS.append((x, y))
+    # iterate through value of X 
+    while (x < X2):
+        x=x+1
+        # E or East is chosen
+        if(d < 0):
+            d = d + dy 
 
-    if steps == 0:
-        # Single point (degenerate line)
-        points.append((int(round(x0)), int(round(y0))))
-        return points
+        # NE or North East is chosen 
+        else:
+            d = d + (dy - dx) 
+            y=y+1
+    
 
-    x_inc = dx / float(steps)
-    y_inc = dy / float(steps)
-
-    x = float(x0)
-    y = float(y0)
-
-    for _ in range(steps + 1):
-        points.append((int(round(x)), int(round(y))))
-        x += x_inc
-        y += y_inc
-
-    return points
-
-
+        # Plot intermediate points 
+        # putpixel(x,y) is used to print pixel 
+        # of line in graphics 
+        POINTS.append((x, y))
+    return POINTS
 
 def display():
     glClear(GL_COLOR_BUFFER_BIT)
 
-    # ----- Draw DDA points -----
+    # ----- Draw Bresenham points -----
     glColor3f(1.0, 1.0, 0.0)
     glPointSize(2.0)
     glBegin(GL_POINTS)
     for (xi, yi) in POINTS:
         glVertex2i(xi, yi)
+
+    POINTS.clear()
     glEnd()
-
-
     glutSwapBuffers()
+    
 
 
 def reshape(width, height):
@@ -69,7 +74,7 @@ def init_glut_window():
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA)
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT)
     glutInitWindowPosition(100, 100)
-    glutCreateWindow(b"DDA Algorithm")
+    glutCreateWindow(b"Single Line Drawing using Bresenham Algorithm")
     glutDisplayFunc(display)
     glutReshapeFunc(reshape)
     glClearColor(0.0, 0.0, 0.0, 1.0)
@@ -78,8 +83,8 @@ def init_glut_window():
 def main():
     global POINTS
 
-    POINTS = DDA(X0, Y0, X1, Y1)
-    print("Generated DDA points:")
+    POINTS = Bresenham(100, 100, 220, 230)
+    print("Generated Bresenham points:")
     print(POINTS)
 
     # Start GLUT

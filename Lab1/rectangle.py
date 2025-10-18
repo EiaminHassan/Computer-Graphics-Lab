@@ -11,8 +11,10 @@ WINDOW_HEIGHT = 600
 
 # Line endpoints for demonstration (you can change these or make them interactive)
 # Coordinates are given in window pixel coordinates (0..WINDOW_WIDTH-1, 0..WINDOW_HEIGHT-1)
-X0, Y0 = 0, 0
-X1, Y1 = 200, 520
+X0, Y0 = 100, 100
+X1, Y1 = 200, 100
+X2, Y2 = 200, 200
+X3, Y3 = 100, 200
 
 
 
@@ -27,15 +29,25 @@ def display():
     # glColor3f sets the current primitive color for subsequent geometry.
     # Optionally draw the endpoints as larger green points for clarity
     # glPointSize(4.0)    
-    # glColor3f(1.0, 0.0, 0.0)  # red color for line points
+    glColor3f(2.0, 3.0, 0.0)
 
 
-     
-    glLineWidth(4.0)
-    glColor3f(0.0, 1.0, 0.0)
+    glLineWidth(3.0)
+
+    # # Draw a rectangle
+    glPointSize(4.0)
     glBegin(GL_LINES)
-    glVertex2f(int(X0), int(Y0))
-    glVertex2f(int(X1), int(Y1))
+
+    glVertex2f(X0, Y0)
+    glVertex2f(X1, Y1)
+    glVertex2f(X2, Y2)
+    glVertex2f(X3, Y3)
+
+    glVertex2f(X0, Y0)
+    glVertex2f(X3, Y3)
+    glVertex2f(X1, Y1)
+    glVertex2f(X2, Y2)
+    
     glEnd()
 
 
@@ -98,7 +110,7 @@ def init_glut_window():
 
 
     # Create and show window with title (this call creates an OpenGL context)
-    glutCreateWindow(b"DDA Line Drawing Algorithm - PyOpenGL + GLUT")
+    glutCreateWindow(b"Rectangle - PyOpenGL + GLUT")
 
 
     # Register GLUT callback functions
