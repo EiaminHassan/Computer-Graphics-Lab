@@ -32,6 +32,7 @@ def Circlepoints(x, y, x0, y0):
     draw_points(x0 + x, y0 - y)
 
 
+
 def draw_points(x, y):
     # Draw a single point at (x, y)
     glPointSize(3) #pixel size. by default 1 thake
@@ -45,14 +46,13 @@ def iterate():
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     
-    glOrtho(0.0, 500, 0.0, 500, 0.0, 1.0) #2D orthographic viewing region. parameter gula holo (left, right, bottom, top, near, far)
+    glOrtho(90, 410, 290, 660, 0.0, 1.0) #2D orthographic viewing region. parameter gula holo (left, right, bottom, top, near, far)
     # padding = extra space around the circle
     # r = radius
     # left   = x0 - r - padding
     # right  = x0 + r + padding
     # bottom = y0 - r - padding
     # top    = y0 + r + padding 
-
     glMatrixMode (GL_MODELVIEW)
     glLoadIdentity()
 
@@ -64,8 +64,8 @@ def showScreen():
     glColor3f(1.0, 1.0, 0.0) #konokichur color set (RGB)
 
     #call the draw methods here
-    x = 400
-    y = 300
+    x = 250
+    y = 500
     radius = 150
     MidpointCircle(radius, x, y)
    

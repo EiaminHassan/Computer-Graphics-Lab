@@ -1,0 +1,301 @@
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
+
+# Window size constants
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
+
+# Main face circle
+FACE_CENTER_X = 400
+FACE_CENTER_Y = 300
+FACE_RADIUS = 150
+
+# Left ear
+LEFT_EAR_X = 300
+LEFT_EAR_Y = 472
+
+#Both ear radius
+EAR_RADIUS = 50
+
+# Right ear
+RIGHT_EAR_X = 500
+RIGHT_EAR_Y = 472
+
+# Left eye
+LEFT_EYE_X = 360
+LEFT_EYE_Y = 330
+EYE_OUTER_RADIUS = 30
+
+#Both inner eye radius
+EYE_INNER_RADIUS = 15
+
+# Right eye
+RIGHT_EYE_X = 440
+RIGHT_EYE_Y = 330
+
+# Mouth
+MOUTH_CENTER_X = 400
+MOUTH_CENTER_Y = 200
+MOUTH_RADIUS = 25
+
+# Nose coordinates
+start_x = 400
+start_y = 280
+end_x = 400
+end_y = 240
+
+
+def display():
+    glClear(GL_COLOR_BUFFER_BIT)
+    glColor3f(1.0, 1.0, 0)  # Yellow
+    glPointSize(2.0)
+    
+    glBegin(GL_POINTS)
+    
+    # Draw main face circle
+    points = MidpointCircle(FACE_RADIUS, FACE_CENTER_X, FACE_CENTER_Y)
+    for point in points:
+        glVertex2f(point[0], point[1])
+    
+    # Draw left ear
+    points = MidpointCircle(EAR_RADIUS, LEFT_EAR_X, LEFT_EAR_Y)
+    for point in points:
+        glVertex2f(point[0], point[1])
+    
+    # Draw right ear
+    points = MidpointCircle(EAR_RADIUS, RIGHT_EAR_X, RIGHT_EAR_Y)
+    for point in points:
+        glVertex2f(point[0], point[1])
+    
+    # Draw left eye outer circle
+    points = MidpointCircle(EYE_OUTER_RADIUS, LEFT_EYE_X, LEFT_EYE_Y)
+    for point in points:
+        glVertex2f(point[0], point[1])
+    
+    # Draw left eye inner circle
+    points = MidpointCircle(EYE_INNER_RADIUS, LEFT_EYE_X, LEFT_EYE_Y)
+    for point in points:
+        glVertex2f(point[0], point[1])
+    
+    # Draw right eye outer circle
+    points = MidpointCircle(EYE_OUTER_RADIUS, RIGHT_EYE_X, RIGHT_EYE_Y)
+    for point in points:
+        glVertex2f(point[0], point[1])
+    
+    # Draw right eye inner circle
+    points = MidpointCircle(EYE_INNER_RADIUS, RIGHT_EYE_X, RIGHT_EYE_Y)
+    for point in points:
+        glVertex2f(point[0], point[1])
+    
+    # Draw vertical line from nose (center line)
+    points = midPoint(start_x,start_y,end_x,end_y)
+    for point in points:
+        glVertex2f(point[0], point[1])
+    
+    
+    # Mouth
+    points = MidpointCircle(MOUTH_RADIUS, MOUTH_CENTER_X, MOUTH_CENTER_Y)
+    for point in points:
+        if point[1] <= MOUTH_CENTER_Y:
+            glVertex2f(point[0], point[1])
+    
+    glEnd()
+    glutSwapBuffers()
+
+
+# Midpoint Circle Algorithm
+def MidpointCircle(radius, x0, y0):
+    """
+    Midpoint Circle Algorithm
+    Draws a circle using 8-way symmetry
+    """
+    x = 0
+    y = radius
+    d = 1 - radius
+    points = []
+    
+    points.extend(Circlepoints(x, y, x0, y0))
+    
+    while x <= y:
+        if d < 0:
+            d = d + 2 * x + 3
+            x = x + 1
+        else:
+            d = d + (2 * x) - (2 * y) + 5
+            x = x + 1
+            y = y - 1
+        
+        points.extend(Circlepoints(x, y, x0, y0))
+    
+    return points
+
+
+def Circlepoints(x, y, x0, y0):
+    """
+    Generate 8 symmetric points for circle
+    """
+    return [
+        (x + x0, y + y0),
+        (y + x0, x + y0),
+        (y + x0, -x + y0),
+        (x + x0, -y + y0),
+        (-x + x0, -y + y0),
+        (-y + x0, -x + y0),
+        (-y + x0, x + y0),
+        (-x + x0, y + y0)
+    ]
+
+
+# Midpoint Line Drawing Algorithm
+
+def get_zone(x0, y0, x1, y1):
+    """
+    Determine which of the 8 zones (octants) the line (x0,y0)->(x1,y1) lies in.
+    This lets us convert any line into zone 0 (dx>=dy>=0), run the simple
+    midpoint algorithm there, then transform points back.
+    """
+    dx = x1 - x0
+    dy = y1 - y0
+
+    if abs(dx) >= abs(dy):
+        if dx >= 0 and dy >= 0:
+            return 0
+        elif dx < 0 and dy >= 0:
+            return 3
+        elif dx < 0 and dy < 0:
+            return 4
+        else:
+            return 7
+    else:     
+        if dx >= 0 and dy >= 0:
+            return 1
+        elif dx < 0 and dy >= 0:
+            return 2
+        elif dx < 0 and dy < 0:
+            return 5
+        else:  # dx >= 0 and dy < 0
+            return 6
+
+
+def convert_to_zone_0(x, y, zone):
+    """
+    Convert coordinates from any zone to zone 0
+    """
+    if zone == 0:
+        return x, y
+    elif zone == 1:
+        return y, x
+    elif zone == 2:
+        return y, -x
+    elif zone == 3:
+        return -x, y
+    elif zone == 4:
+        return -x, -y
+    elif zone == 5:
+        return -y, -x
+    elif zone == 6:
+        return -y, x
+    elif zone == 7:
+        return x, -y
+
+
+def convert_from_zone_0(x, y, zone):
+    """
+    map a zone-0 point back to the original zone.
+    """
+    if zone == 0:
+        return x, y
+    elif zone == 1:
+        return y, x
+    elif zone == 2:
+        return -y, x
+    elif zone == 3:
+        return -x, y
+    elif zone == 4:
+        return -x, -y
+    elif zone == 5:
+        return -y, -x
+    elif zone == 6:
+        return y, -x
+    elif zone == 7:
+        return x, -y
+
+
+def midPoint(X1, Y1, X2, Y2):
+    """
+    Midpoint Line Drawing Algorithm (integer-only version)
+    using zone conversion for all 8 octants.
+
+    Returns a list of (x, y) points that approximate the line segment
+    from (X1, Y1) to (X2, Y2).
+    """
+    zone = get_zone(X1, Y1, X2, Y2)
+
+    # Convert endpoints into zone 0
+    nx1, ny1 = convert_to_zone_0(X1, Y1, zone)
+    nx2, ny2 = convert_to_zone_0(X2, Y2, zone)
+
+    dx = nx2 - nx1
+    dy = ny2 - ny1
+
+    # Decision variable and its increments (classic midpoint form)
+    d  = 2 * dy - dx
+    E  = 2 * dy
+    NE = 2 * (dy - dx)
+
+    x, y = nx1, ny1
+    points_zone0 = [(x, y)]
+
+    # Basic loop in zone 0: x always increases
+    while x < nx2:
+        if d < 0:
+            d += E
+            x += 1
+        else:
+            d += NE
+            x += 1
+            y += 1
+        points_zone0.append((x, y))
+
+    # Transform all computed points back to original zone
+    final_points = []
+    for px, py in points_zone0:
+        fx, fy = convert_from_zone_0(px, py, zone)
+        final_points.append((fx, fy))
+
+    return final_points
+
+
+# OpenGL Setup
+def reshape(width, height):
+    glViewport(0, 0, width, height)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluOrtho2D(0, width, 0, height)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+
+
+def init_glut_window():
+    glutInit()
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA)
+    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT)
+    glutInitWindowPosition(400, 100)
+    glutCreateWindow(b"Mickey Mouse Face - Midpoint Algorithm")
+    glutDisplayFunc(display)
+    glutReshapeFunc(reshape)
+    glClearColor(0.0, 0.0, 0.0, 1.0)  # Black background
+
+
+def main():
+    """
+    Program entry point.
+    Initialize GLUT and window, then enter main loop.
+    """
+    init_glut_window()
+    glutMainLoop()
+
+
+if __name__ == "__main__":
+    main()

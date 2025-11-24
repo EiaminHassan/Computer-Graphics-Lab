@@ -105,7 +105,6 @@ def midPoint(x1, y1, x2, y2):
 
 
 def reshape(width, height):
-    """GLUT reshape callback: called when the window is resized."""
     glViewport(0, 0, width, height)  # Set viewport to cover the new window size
 
     glMatrixMode(GL_PROJECTION)      # Switch to projection matrix
@@ -121,50 +120,24 @@ def reshape(width, height):
 def display():
     glClear(GL_COLOR_BUFFER_BIT)
 
-    # Set color and point size
     glPointSize(4.0)
-    glColor3f(1.0, 0.0, 0.0)  # red lines
+    glColor3f(1.0, 0.0, 0.0)
 
-    # --- Define vertices and edges ---
-    vertices = {
-        'A': (2, 2), 'B': (5, 2), 'C': (5, 5), 'D': (2, 5),
-        'E': (1, 3), 'F': (4, 3), 'G': (4, 6), 'H': (1, 6)
-    }
-
-    edges = [
-        ('A', 'B'), ('B', 'C'), ('C', 'D'), ('D', 'A'),
-        ('E', 'F'), ('F', 'G'), ('G', 'H'), ('H', 'E'),
-        ('A', 'E'), ('B', 'F'), ('C', 'G'), ('D', 'H')
-    ]
-
-    # Scale up coordinates for better visibility
-    scale = 50
-
-    # --- Draw cube edges using DDA or midpoint line ---
-    glBegin(GL_POINTS)
-    for edge in edges:
-        x0, y0 = vertices[edge[0]]
-        x1, y1 = vertices[edge[1]]
-
-        # Scale coordinates
-        x0, y0 = x0 * scale, y0 * scale
-        x1, y1 = x1 * scale, y1 * scale
-
-        # Draw line points using your midPoint function
-        points = midPoint(int(x0), int(y0), int(x1), int(y1))
-        for p in points:
-            glVertex2i(int(p[0]), int(p[1]))
-    glEnd()
-
-    # --- Draw vertex points in green ---
-    glPointSize(6.0)
-    glColor3f(0.0, 1.0, 0.0)
-    glBegin(GL_POINTS)
-    for v in vertices.values():
-        glVertex2i(int(v[0] * scale), int(v[1] * scale))
-    glEnd()
+    # example line: only two endpoints
+    x1, y1 = 100, 100
+    x2, y2 = 300, 300
+    draw_line_midpoint(x1, y1, x2, y2)
 
     glutSwapBuffers()
+
+def draw_line_midpoint(x1, y1, x2, y2):
+    points = midPoint(x1, y1, x2, y2)
+    print(points)
+    glBegin(GL_POINTS)
+    for (px, py) in points:
+        glVertex2i(int(px), int(py))
+    glEnd()
+
 
 
 def init_glut_window():
@@ -187,16 +160,13 @@ def init_glut_window():
 
 
     # Create and show window with title (this call creates an OpenGL context)
-    glutCreateWindow(b"DDA Line Drawing Algorithm - PyOpenGL + GLUT")
+    glutCreateWindow(b"Cube with Midpoint Line Algorithm")
 
 
     # Register GLUT callback functions
     glutDisplayFunc(display)   # display callback: called when the window must be redrawn
     glutReshapeFunc(reshape)   # reshape callback: called when window is resized
-   
-    # Some GLUT implementations require an initial call to reshape or set up projection,
-    # but our reshape will be called automatically on initial window creation.
-    # Set clear color: glClearColor(r,g,b,a) sets the background color for glClear
+
     glClearColor(0.0, 0.0, 0.0, 1.0)  # black background
 
 
@@ -205,14 +175,7 @@ def init_glut_window():
 def main():
    
     init_glut_window()
-
-
-    # Enter GLUT's main loop. This hands control to GLUT which will call the callbacks we registered.
-    # GLUT's main loop handles events (keyboard, mouse, reshape) and rendering.
     glutMainLoop()
-
-
-
 
 if __name__ == "__main__":
     main()
